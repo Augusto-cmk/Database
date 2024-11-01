@@ -1,4 +1,4 @@
-from src.util.database import Database
+from src.util.database import Database,DataFrame
 from threading import Thread,Event
 import time
 import os
@@ -62,13 +62,15 @@ class EventDatabaseManager:
             if len(self.db) > 0:
                 try:
                     result = self.db[names_in].apply(func, axis=1,**args)
+                    if result.empty:
+                        self.db[names_out] = [None for i in range(len(names_out))]
                     if len(result.columns) == len(names_out):
                         result.columns = names_out
                         existing_cols = list(set(self.db.columns) & set(names_out))
                         new_cols = list(set(names_out) - set(existing_cols))
 
-                        for col in existing_cols:
-                            mask = self.db[col].isna() | (self[col] == None)
+                        for col in existing_cols: ## alterar isso para que funcione no database
+                            mask = self.db[col].isna() | (self.db[col] == None)
                             self.db.loc[mask,col] = result.loc[mask, col]
 
                         self.db[new_cols] = result[new_cols]

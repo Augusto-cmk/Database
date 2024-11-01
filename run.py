@@ -17,6 +17,6 @@ df = Database(data=iris.data, columns=iris.feature_names)
 e = EventDatabaseManager(df)
 
 e.exec(teste,['sepal length (cm)'],['teste'])
-e.exec(teste2,['sepal length (cm)'],['teste2'])
+e.exec(teste2,['teste'],['teste2'])
 e._join()
 print(df)
