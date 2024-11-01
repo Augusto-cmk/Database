@@ -1,6 +1,7 @@
-from src.util.database import Database,DataFrame
+from src.util.database import Database
 from sklearn.datasets import load_iris
-from time import time,sleep
+from time import sleep
+from src.util.event import EventDatabaseManager
 
 iris = load_iris()
 
@@ -8,14 +9,14 @@ def teste(valor):
     sleep(10)
     return valor
 
+def teste2(valor):
+    sleep(10)
+    return valor
+
 df = Database(data=iris.data, columns=iris.feature_names)
+e = EventDatabaseManager(df)
 
-start = time()
-df['sepal length (cm)'].apply(teste,axis=1)
-finish = time()
-print("Tempo apply com threads: ",finish-start)
-
-start = time()
-DataFrame(df['sepal length (cm)']).apply(lambda x:teste(x),axis=1)
-finish = time()
-print("Tempo apply sem threads: ",finish-start)
+e.exec(teste,['sepal length (cm)'],['teste'])
+e.exec(teste2,['sepal length (cm)'],['teste2'])
+e._join()
+print(df)
