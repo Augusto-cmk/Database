@@ -5,18 +5,20 @@ from src.util.event import EventDatabaseManager
 
 iris = load_iris()
 
+df = Database(data=iris.data, columns=iris.feature_names)
+e = EventDatabaseManager()
+
+@e.exec(['sepal length (cm)'],['teste'])
 def teste(valor):
     sleep(10)
     return valor
 
+@e.exec(['teste'],['teste'])
 def teste2(valor):
     sleep(10)
-    return valor
+    return valor*2
 
-df = Database(data=iris.data, columns=iris.feature_names)
-e = EventDatabaseManager(df)
-
-e.exec(teste,['sepal length (cm)'],['teste'])
-e.exec(teste2,['teste'],['teste2'])
-e._join()
+teste(df)
+teste2(df)
+e.start()
 print(df)
