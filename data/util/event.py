@@ -14,9 +14,10 @@ class EventDatabaseManager:
     def __init__(self):
         self.__status = {}
         self.__fila_monitor = Queue()
-        self.__skip_thread = Thread(target=self.__all_skip)
-        self.__threads:list[Thread] = []
-        self.__monitor = Thread(target=self.monitor_status)
+        self.__skip_thread = None
+        self.__threads_data:list[dict] = []
+        self.__threads: list[Thread] = []
+        self.__monitor = None
         self.__runn = {}
         self.__stop_event = Event()
         self.__stop_skip_key = Event()
@@ -37,10 +38,17 @@ class EventDatabaseManager:
         return False
     
     def start(self):
-        if len(self.__threads) > 0:
+        if len(self.__threads_data) > 0:
+            self.__monitor = Thread(target=self.monitor_status)
             self.__monitor.start()
-            for thread in self.__threads:
-                thread.start()
+            new_threads = []
+            for thread in self.__threads_data:
+                new_thread = Thread(target=thread['target'], args=thread['args'], kwargs=thread['kwargs'])
+                new_threads.append(new_thread)
+                new_thread.start()
+            
+            self.__threads: list[Thread] = new_threads
+            self.__skip_thread = Thread(target=self.__all_skip)
             self.__skip_thread.start()
             self.__join()
         else:
@@ -97,9 +105,9 @@ class EventDatabaseManager:
             def wrapper(db:Database,*args,**kwargs):
                 if self.__time == None:
                     self.__time = time.time()
-                thread = Thread(target=thread_func,args=[func,db,*args],kwargs=kwargs)
+                thread = {"target":thread_func,"args":[func,db,*args],"kwargs":kwargs}
                 self.__runn[func.__name__] = True
-                self.__threads.append(thread)
+                self.__threads_data.append(thread)
             return wrapper
         return do
     
