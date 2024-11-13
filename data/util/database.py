@@ -44,7 +44,7 @@ class Database(DataFrame):
             results[col] = Series([func(value, *args, **kwargs) for value in self[col]])
 
         def process_row(idx):
-            results[idx] = Series([func(*self.loc[idx].values, *args, **kwargs)])
+            results[idx] = Series(func(*self.loc[idx].values, *args, **kwargs))
 
         threads:list[Thread] = []
         
